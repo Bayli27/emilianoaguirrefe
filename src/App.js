@@ -1,36 +1,29 @@
-import { AppHeader } from '@corva/ui/components';
+import { useState } from 'react';
+import { LoadingIndicator, AppHeader } from '@corva/ui/components';
 import PropTypes from 'prop-types';
 import { DEFAULT_SETTINGS } from './constants';
 
-import logo from './assets/logo.svg';
-import styles from './App.css';
+import { useActualSurveyData } from './utils';
+import { ActualSurveyChart } from './components';
 
+import styles from './App.css';
 function App(props) {
-  const { isExampleCheckboxChecked, appHeaderProps } = props;
+  // NOTE: Read asset_id from well. Most datasets are indexed by asset_id.
+  const { well: { asset_id: assetId }, coordinates, appHeaderProps, } = props;
+  const [dataset, setDataset] = useState("data.actual_survey");
+  
+  // NOTE: Use custom react hook to encapsulate data fetching/subscriptions logic
+  const { actualSurveyData, loading } = useActualSurveyData({ assetId, dataset });
+
   return (
     <div className={styles.container}>
       <AppHeader {...appHeaderProps} />
       <div className={styles.content}>
-        <div>
-          <img src={logo} alt="logo" className={styles.logo} />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-            <br />
-            <br />
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </div>
-        <div>
-          Settings &quot;Example&quot; checkbox is{' '}
-          {isExampleCheckboxChecked ? 'checked' : 'unchecked'}
-        </div>
+        {/*Show loading indicator while data is loading*/}
+        {loading && <LoadingIndicator />}
+        {!loading && (
+          <ActualSurveyChart data={actualSurveyData} dataset={dataset} coordinates={coordinates} />
+        )}
       </div>
     </div>
   );
